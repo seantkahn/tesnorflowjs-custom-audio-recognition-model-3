@@ -37,7 +37,10 @@
     <br/><br/>
     <button id="train" onclick="train()">Train</button>
     <button id="save model" onmousedown="saveModel()">Save Model</button>
-
+    <input type="file" id="upload-json" accept=".json" />
+    <input type="file" id="upload-weights" accept=".bin" multiple />
+    <button onclick="loadModelFromFiles()">Load Model</button>
+    
     <br/><br/>
     <button id="listen" onclick="listen()">Listen</button>
     <input type="range" id="output" min="0" max="10" step="0.1">

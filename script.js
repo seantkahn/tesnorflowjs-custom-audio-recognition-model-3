@@ -44,7 +44,20 @@ async function saveModel() {
 async function loadNewModel() {
     const model = await tf.loadLayersModel('http://localhost:1234/my-model/model.json');
 }
-
+async function loadModelFromFiles() {
+    const jsonUpload = document.getElementById('upload-json');
+    const weightsUpload = document.getElementById('upload-weights');
+  
+    if (jsonUpload.files.length > 0 && weightsUpload.files.length > 0) {
+      const modelURL = URL.createObjectURL(jsonUpload.files[0]);
+      const weightsURLs = Array.from(weightsUpload.files).map(f => URL.createObjectURL(f));
+      
+      // TensorFlow.js expects an object mapping names to URLs for the weight files
+      const model = await tf.loadLayersModel(tf.io.browserFiles([jsonUpload.files[0], ...weightsUpload.files]));
+      console.log('Model loaded successfully');
+    }
+  }
+  
 function updateModelForNewLabels() {
     const numLabels = labels.length;
     model.layers[model.layers.length - 1].units = numLabels;
