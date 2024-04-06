@@ -37,6 +37,34 @@ function collect(label) {
 }
 
 window.collect = collect;
+async function saveModel() {
+    await model.save('downloads://my-model');
+}
+
+async function loadNewModel() {
+    const model = await tf.loadLayersModel('http://localhost:1234/my-model/model.json');
+}
+
+function updateModelForNewLabels() {
+    const numLabels = labels.length;
+    model.layers[model.layers.length - 1].units = numLabels;
+    // Other necessary updates to the model, then recompile
+    model.compile({
+        optimizer: 'adam',
+        loss: 'categoricalCrossentropy',
+        metrics: ['accuracy']
+    });
+}
+
+// Function to add a new label
+function addNewLabel(labelName) {
+    // Add new label to an array of labels
+    if (!labels.includes(labelName)) {
+        labels.push(labelName);
+        // Update the model's last layer to accommodate the new number of classes
+        updateModelForNewLabels();
+    }
+}
 
 
 //And to avoid numerical issues, we normalize the data to have an average of 0 and a standard deviation of 1. In this case, the spectrogram values are usually large negative numbers around -100 and deviation of 10:
@@ -134,7 +162,6 @@ async function moveSlider(labelTensor) {
 //To convert the probability distribution to a single integer representing the most likely class, we call probs.argMax(1)which returns the class index with the highest probability. We pass a "1" as the axis parameter because we want to compute the argMax over the last dimension, numClasses.
 
 
-
 function listen() {
     if (recognizer.isListening()) {
       recognizer.stopListening();
@@ -165,7 +192,8 @@ function listen() {
 }
 
 
-
+window.listen = listen;
+window.train = train;
 function predictWord() {
  // Array of words that the recognizer is trained to recognize.
  const words = recognizer.wordLabels();
@@ -185,4 +213,12 @@ async function app() {
     await recognizer.ensureModelLoaded();
     //predictWord();
    }
-   app();
+app();
+
+
+
+   //todo
+  // when training the model, is the model creating new classes based on the buttons that call the collect function? where does this training data go, and how do i know what the models classes are and how to add more? If I were to end the session, would the model cease to exist and I would have to start from scratch training again?
+
+   //save model and load up model in order to continue training and using it in the future
+    //add more classes to model
