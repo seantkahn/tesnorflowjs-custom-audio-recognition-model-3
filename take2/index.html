@@ -1,0 +1,58 @@
+<html>
+  <head>
+        <!-- Import TensorFlow.js library latest -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+
+        <!-- The default vocabulary includes the following words: the ten digits from "zero" to "nine", "up", "down", "left", "right", "go", "stop", "yes", "no", as well as the additional categories of "unknown word" and "background noise". -->
+        <!-- Import TensorFlow.js speech commands model -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+
+        <!-- Import TensorFlow.js visualization library -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis/dist/tfjs-vis.umd.min.js" type="text/javascript"></script>        
+  </head>
+  <body>
+    <button id="A" onmousedown="collect(0)" onmouseup="collect(null)">A</button>
+    <button id="B" onmousedown="collect(1)"onmouseup="collect(null)">B</button>
+    <button id="C" onmousedown="collect(2)"onmouseup="collect(null)">C</button>
+    <button id="D" onmousedown="collect(3)"onmouseup="collect(null)">D</button>
+    <button id="E" onmousedown="collect(4)"onmouseup="collect(null)">E</button>
+    <button id="F" onmousedown="collect(5)"onmouseup="collect(null)">F</button>
+    <button id="G" onmousedown="collect(6)"onmouseup="collect(null)">G</button>
+    <button id="H" onmousedown="collect(7)"onmouseup="collect(null)">H</button>
+    <button id="I" onmousedown="collect(8)"onmouseup="collect(null)">I</button>
+    <button id="J" onmousedown="collect(9)"onmouseup="collect(null)">J</button>
+    <button id="K" onmousedown="collect(10)"onmouseup="collect(null)">K</button>
+    <button id="L" onmousedown="collect(11)"onmouseup="collect(null)">L</button>
+    <button id="M" onmousedown="collect(12)"onmouseup="collect(null)">M</button>
+    <button id="N" onmousedown="collect(13)"onmouseup="collect(null)">N</button>
+    <button id="O" onmousedown="collect(14)"onmouseup="collect(null)">O</button>
+    <button id="P" onmousedown="collect(15)"onmouseup="collect(null)">P</button>
+    <button id="Q" onmousedown="collect(16)"onmouseup="collect(null)">Q</button>
+    <button id="R" onmousedown="collect(17)"onmouseup="collect(null)">R</button>
+    <button id="S" onmousedown="collect(18)"onmouseup="collect(null)">S</button>
+    <button id="T" onmousedown="collect(19)"onmouseup="collect(null)">T</button>
+    <button id="U" onmousedown="collect(20)"onmouseup="collect(null)">U</button>
+    <button id="V" onmousedown="collect(21)"onmouseup="collect(null)">V</button>
+    <button id="W" onmousedown="collect(22)"onmouseup="collect(null)">W</button>
+    <button id="X" onmousedown="collect(23)"onmouseup="collect(null)">X</button>
+    <button id="Y" onmousedown="collect(24)"onmouseup="collect(null)">Y</button>
+    <button id="Z" onmousedown="collect(25)"onmouseup="collect(null)">Z</button>
+    <button id="Apple" onmousedown="collect(26)"onmouseup="collect(null)">Apple</button>
+    <button id="Bird" onmousedown="collect(27)"onmouseup="collect(null)">Bird</button>
+    <button id="Boat" onmousedown="collect(28)"onmouseup="collect(null)">Boat</button>
+    <button id="Butterfly" onmousedown="collect(29)"onmouseup="collect(null)">Butterfly</button>
+    <button id="Car" onmousedown="collect(30)"onmouseup="collect(null)">Car</button>
+    <button id="Dog" onmousedown="collect(31)"onmouseup="collect(null)">Dog</button>
+    <button id="Cat" onmousedown="collect(32)"onmouseup="collect(null)">Cat</button>
+    <button id="Horse" onmousedown="collect(33)"onmouseup="collect(null)">Horse</button>
+    <button id="Train" onmousedown="collect(34)"onmouseup="collect(null)">Train</button>
+    <button id="Noise" onmousedown="collect(35)"onmouseup="collect(null)">Noise</button>
+    <br/><br/>
+    <button id="train" onclick="train()">Train</button>
+    <button id="listen" onclick="listen()">Listen</button>
+    <button id="save" onclick="save()">Save</button>
+    <br/><br/>
+    <div id="console"></div>
+    <script src="script.js"></script>
+  </body>
+</html>

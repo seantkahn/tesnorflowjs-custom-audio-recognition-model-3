@@ -103,6 +103,7 @@ let model;
 //At a high level we are doing two things: buildModel() defines the model architecture and train() trains the model using the collected data. 
 async function train() {
  toggleButtons(false);
+ //change3? second onehot parameter integer to number of classes that are being trained
  const ys = tf.oneHot(examples.map(e => e.label), 3);
  const xsShape = [examples.length, ...INPUT_SHAPE];
  const xs = tf.tensor(flatten(examples.map(e => e.vals)), xsShape);
@@ -129,12 +130,14 @@ function buildModel() {
  model = tf.sequential();
  model.add(tf.layers.depthwiseConv2d({
    depthMultiplier: 8,
+   //change3?
    kernelSize: [NUM_FRAMES, 3],
    activation: 'relu',
    inputShape: INPUT_SHAPE
  }));
  model.add(tf.layers.maxPooling2d({poolSize: [1, 2], strides: [2, 2]}));
  model.add(tf.layers.flatten());
+ //change3? second parameter to number of classes that are being trained
  model.add(tf.layers.dense({units: 3, activation: 'softmax'}));
 
  //We compile our model to get it ready for training:
