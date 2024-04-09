@@ -161,5 +161,9 @@ function listen() {
 }
 
 async function save () {
-  const model = await tf.loadLayersModel('HTTP-Server/dronemodel.json');
+    await model.save('downloads://my-model');
+}
+async function loadNewModel() {
+    const model = await tf.loadLayersModel('downloads://my-model');
+    //const model = await tf.loadLayersModel('http://localhost:1234/my-model/model.json');
 }
