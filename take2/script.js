@@ -95,8 +95,8 @@ function buildModel() {
  model = tf.sequential();
  model.add(tf.layers.depthwiseConv2d({
    depthMultiplier: 8,
-   //change to number of desired classes for model training
-   kernelSize: [NUM_FRAMES,  36],
+   //change to number of desired classes for model training?
+   kernelSize: [NUM_FRAMES,  3],
    activation: 'relu',
    inputShape: INPUT_SHAPE
  }));
@@ -165,5 +165,8 @@ async function save () {
 }
 async function loadNewModel() {
     const model = await tf.loadLayersModel('"C:\Users\Seank\OneDrive\Desktop\Models\my-model.json"');
+    await model.ensureModelLoaded();
+    // Add this line.
+    buildModel();
     //const model = await tf.loadLayersModel('http://localhost:1234/my-model/model.json');
 }
