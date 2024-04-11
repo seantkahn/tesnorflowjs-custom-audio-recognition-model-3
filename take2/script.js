@@ -40,8 +40,13 @@ app();
 
 // One frame is ~23ms of audio.
 const NUM_FRAMES = 6;
+//each training example will have 2 fields:
+//label****: 0, 1, and 2 for "Left", "Right" and "Noise" respectively.
+//vals****: 696 numbers holding the frequency information (spectrogram)
+//and we store all data in the examples variable:
 let examples = [];
-
+//collect associates a label with the output of recognizer.lsiten, which provides a raw spectrogram because includespectrogram is set to true above. 
+//collect creates training examples for the model
 function collect(label) {
  if (recognizer.isListening()) {
    return recognizer.stopListening();
@@ -50,7 +55,8 @@ function collect(label) {
    return;
  }
  recognizer.listen(async ({spectrogram: {frameSize, data}}) => {
-   let vals = normalize(data.subarray(-frameSize * NUM_FRAMES));
+  //To avoid numerical issues, we normalize the data to have an average of 0 and a standard deviation of 1. In this case, the spectrogram values are usually large negative numbers around -100 and deviation of 10: 
+  let vals = normalize(data.subarray(-frameSize * NUM_FRAMES));
    examples.push({vals, label});
    document.querySelector('#console').textContent =
        `${examples.length} examples collected`;
@@ -60,15 +66,19 @@ function collect(label) {
    invokeCallbackOnNoiseAndUnknown: true
  });
 }
-
+//To avoid numerical issues, we normalize the data to have an average of 0 and a standard deviation of 1. In this case, the spectrogram values are usually large negative numbers around -100 and deviation of 10:
 function normalize(x) {
  const mean = -100;
  const std = 10;
  return x.map(x => (x - mean) / std);
 }
-
+//The input shape of the model is [NUM_FRAMES, 232, 1] where each frame is 23ms of audio containing 232 numbers that correspond to different frequencies (232 was chosen because it is the amount of frequency buckets needed to capture the human voice). 
 const INPUT_SHAPE = [NUM_FRAMES, 232, 1];
 let model;
+//The model is a convolutional neural network with a depthwise convolutional layer, a max pooling layer, and a dense layer. 
+    //The model is compiled with the Adam optimizer and the categorical crossentropy loss function. The training process is done in batches of 16 examples for 10 epochs. 
+    //The training process is asynchronous and the UI is updated with the accuracy and epoch number at the end of each epoch.
+//At a high level we are doing two things: buildModel() defines the model architecture and train() trains the model using the collected data. 
 
 async function train() {
  toggleButtons(false);
@@ -76,7 +86,7 @@ async function train() {
  const ys = tf.oneHot(examples.map(e => e.label), 36);
  const xsShape = [examples.length, ...INPUT_SHAPE];
  const xs = tf.tensor(flatten(examples.map(e => e.vals)), xsShape);
-
+ //The training goes 10 times (epochs) over the data using a batch size of 16 (processing 16 examples at a time) and shows the current accuracy in the UI:
  await model.fit(xs, ys, {
    batchSize: 16,
    epochs: 10,
@@ -90,12 +100,14 @@ async function train() {
  tf.dispose([xs, ys]);
  toggleButtons(true);
 }
-
+//The input shape of the model is [NUM_FRAMES, 232, 1] where each frame is 23ms of audio containing 232 numbers that correspond to different frequencies (232 was chosen because it is the amount of frequency buckets needed to capture the human voice). 
+//In this codelab, we are using samples that are 3 frames long (~70ms samples) since we are making sounds instead of speaking whole words to control the slider.
+//The model has 4 layers: a convolutional layer that processes the audio data (represented as a spectrogram), a max pool layer, a flatten layer, and a dense layer that maps to the 3 actions:
 function buildModel() {
  model = tf.sequential();
  model.add(tf.layers.depthwiseConv2d({
    depthMultiplier: 8,
-   //change to number of desired classes for model training?
+   //change to number of desired classes for model training? - NO
    kernelSize: [NUM_FRAMES,  3],
    activation: 'relu',
    inputShape: INPUT_SHAPE
@@ -104,7 +116,12 @@ function buildModel() {
  model.add(tf.layers.flatten());
  //change units to number of classes for training
  model.add(tf.layers.dense({units: 36, activation: 'softmax'}));
- const optimizer = tf.train.adam(0.01);
+  //We compile our model to get it ready for training:
+  //We use the Adam optimizer and the categorical crossentropy loss function, which is suitable for multiclass classification problems.
+ //We use the Adam optimizer, a common optimizer used in deep learning, and categoricalCrossEntropy for loss, the standard loss function used for classification. 
+//In short, it measures how far the predicted probabilities (one probability per class) are from having 100% probability in the true class, and 0% probability for all the other classes. 
+//We also provide accuracy as a metric to monitor, which will give us the percentage of examples the model gets correct after each epoch of training.
+  const optimizer = tf.train.adam(0.01);
  model.compile({
    optimizer,
    loss: 'categoricalCrossentropy',
@@ -115,14 +132,14 @@ function buildModel() {
 function toggleButtons(enable) {
  document.querySelectorAll('button').forEach(b => b.disabled = !enable);
 }
-
+//converts an array of tensors into a single Float32Array
 function flatten(tensors) {
  const size = tensors[0].length;
  const result = new Float32Array(tensors.length * size);
  tensors.forEach((arr, i) => result.set(arr, i * size));
  return result;
 }
-
+//Data class labels
 var labels = [
     "A", "B", "C", "D", "E", "F", "G", "H", 
     "I", "J", "K", "L", "M", "N", "O", "P", 
@@ -130,11 +147,13 @@ var labels = [
     "Y", "Z", "Apple", "Bird", "Boat", "Butterfly", 
     "Car", "Dog", "Cat", "Horse", "Train", "Noise"
   ];
-  async function finish(labelTensor) {
+async function finish(labelTensor) {
  const label = (await labelTensor.data())[0];
  document.getElementById('console').textContent = labels[label];
 } 
-
+//listen() listens to the microphone and makes real time predictions. The code is very similar to the collect() method, which normalizes the raw spectrogram and drops all but the last NUM_FRAMES frames. The only difference is that we also call the trained model to get a prediction:
+//The output of model.predict(input)is a Tensor of shape [1, numClasses] representing a probability distribution over the number of classes. More simply, this is just a set of confidences for each of the possible output classes which sum to 1. The Tensor has an outer dimension of 1 because that is the size of the batch (a single example).
+//To convert the probability distribution to a single integer representing the most likely class, we call probs.argMax(1)which returns the class index with the highest probability. We pass a "1" as the axis parameter because we want to compute the argMax over the last dimension, numClasses.
 function listen() {
  if (recognizer.isListening()) {
    recognizer.stopListening();
@@ -149,9 +168,13 @@ function listen() {
  recognizer.listen(async ({spectrogram: {frameSize, data}}) => {
    const vals = normalize(data.subarray(-frameSize * NUM_FRAMES));
    const input = tf.tensor(vals, [1, ...INPUT_SHAPE]);
+   //The model.predict() method returns a tensor with the probabilities of each class. We use argMax(1) to get the index of the class with the highest probability. We then call moveSlider() to update the slider position based on the predicted class.
    const probs = model.predict(input);
    const predLabel = probs.argMax(1);
+   //print model prediction
    await finish(predLabel);
+   //Disposing tensors is important to free up memory. TensorFlow.js does not automatically clean up memory, so it's important to manually dispose of tensors when they are no longer needed.
+//To clean up GPU memory it's important for us to manually call tf.dispose() on output Tensors. The alternative to manual tf.dispose() is wrapping function calls in a tf.tidy(), but this cannot be used with async functions.
    tf.dispose([input, probs, predLabel]);
  }, {
    overlapFactor: 0.999,
@@ -164,9 +187,10 @@ async function save () {
     await model.save('downloads://my-model');
 }
 async function loadNewModel() {
-    const model = await tf.loadLayersModel('"C:\Users\Seank\OneDrive\Desktop\Models\my-model.json"');
+      // TensorFlow.js expects an object mapping names to URLs for the weight files
+  const model = await tf.loadLayersModel('"C:\Users\Seank\OneDrive\Desktop\Models\my-model.json"');
     await model.ensureModelLoaded();
-    // Add this line.
+      // TensorFlow.js expects an object mapping names to URLs for the weight files
     buildModel();
     //const model = await tf.loadLayersModel('http://localhost:1234/my-model/model.json');
 }
