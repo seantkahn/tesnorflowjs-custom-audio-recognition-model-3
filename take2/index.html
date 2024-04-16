@@ -17,6 +17,10 @@
         <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis/dist/tfjs-vis.umd.min.js" type="text/javascript"></script>        
   </head>
   <body>
+    <input type="file" id="file-input" multiple accept=".wav" >
+    <button id="load-files">Load WAV Files</button>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+
     <button id="A" onmousedown="collect(0)" onmouseup="collect(null)">A</button>
     <button id="B" onmousedown="collect(1)"onmouseup="collect(null)">B</button>
     <button id="C" onmousedown="collect(2)"onmouseup="collect(null)">C</button>
