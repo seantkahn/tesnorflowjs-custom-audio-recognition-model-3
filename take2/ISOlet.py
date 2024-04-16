@@ -3,6 +3,28 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+import pandas as pd
+# Loading the dataset
+data_path = 'isolet.csv'
+isolet_data = pd.read_csv(data_path)
+
+# Encoding string class labels to integers
+label_encoder = LabelEncoder()
+isolet_data['class'] = label_encoder.fit_transform(isolet_data['class'])
+
+# Separating feature columns and the target column
+X = isolet_data.drop('class', axis=1)
+y = isolet_data['class']
+
+# Splitting the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardizing the features by removing the mean and scaling to unit variance
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
 # Setting a random seed to ensure reproducibility of results
 tf.random.set_seed(42)
