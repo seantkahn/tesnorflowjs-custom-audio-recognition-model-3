@@ -182,6 +182,27 @@ function listen() {
    invokeCallbackOnNoiseAndUnknown: true
  });
 }
+document.getElementById('load-files').addEventListener('click', async () => {
+  let files = document.getElementById('file-input').files;
+  for (let file of files) {
+      let audioBuffer = await file.arrayBuffer();
+      let tensor = await convertToTensor(audioBuffer);
+      examples.push({vals: tensor, label: 0}); // Adjust the label as needed
+  }
+});
+
+async function convertToTensor(audioBuffer) {
+  // Decode the audio to a tensor
+  const waveform = await tf.audio.decodeWav(new Uint8Array(audioBuffer), {desiredSamples: 44100});
+  // You might need to adjust the number of samples or the way you handle the audio
+  
+  // Convert the waveform to a spectrogram
+  const spectrogram = tf.signal.stft(waveform, 1024, 256);
+  const magnitudeSpectrogram = tf.abs(spectrogram).sum(2);
+  const normalizedSpectrogram = normalize(magnitudeSpectrogram); // Use your existing normalize function
+  return normalizedSpectrogram;
+}
+
 
 async function save () {
     await model.save('downloads://my-model');
