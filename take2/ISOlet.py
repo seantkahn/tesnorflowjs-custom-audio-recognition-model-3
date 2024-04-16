@@ -1,11 +1,19 @@
+#pip install pandas scikit-learn tensorflow
+
 # Importing necessary libraries from TensorFlow
 import tensorflow as tf
+from tensorflow.keras.callbacks import TensorBoard
+import datetime
+from tensorflow.keras.models import load_model
+
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import pandas as pd
+
+
 # Loading the dataset
 data_path = 'isolet.csv'
 isolet_data = pd.read_csv(data_path)
@@ -63,3 +71,32 @@ history = model.fit(X_train_scaled, y_train, epochs=50, validation_split=0.2, ve
 # Evaluating the model's performance on the test set to check how well it generalizes to new, unseen data
 test_loss, test_acc = model.evaluate(X_test_scaled, y_test, verbose=2)
 print(f"Test accuracy: {test_acc}, Test loss: {test_loss}")
+# Save the model
+# model.save('isolet_model.h5')  # saves the model in the HDF5 file format
+
+# To save as a TensorFlow SavedModel (better for serving with TensorFlow Serving or TF Lite)
+model.save('isolet_model_folder', save_format='tf')
+
+# To load the model
+
+# # Load the model
+# model = load_model('isolet_model.h5')  # If saved as an HDF5 file
+
+# # because saved it using the SavedModel format
+model = load_model('isolet_model_folder')
+# Evaluate the model again
+test_loss, test_acc = model.evaluate(X_test_scaled, y_test, verbose=2)
+print(f"Reloaded model accuracy: {test_acc}, Test loss: {test_loss}")
+
+# # Make predictions
+predictions = model.predict(X_test_scaled)
+predicted_classes = tf.argmax(predictions, axis=1)
+# Once you have your model saved in the TensorFlow SavedModel format, use the TensorFlow.js converter command-line utility to convert your model to the web format:
+#tensorflowjs_converter --input_format=tf_saved_model --output_node_names='Softmax' --saved_model_tags=serve ./isolet_model_folder ./isolet_tfjs_model
+# This command will convert the model and create a new directory isolet_tfjs_model with the converted model files. Here are the options used:
+
+# --input_format=tf_saved_model: Specifies the format of the input model.
+# --output_node_names='Softmax': This might need to be adjusted based on your model’s output layer name if different.
+# --saved_model_tags=serve: Tags used to identify the MetaGraphDef to load from the SavedModel.
+# ./isolet_model_folder: The directory of your saved TensorFlow SavedModel.
+# ./isolet_tfjs_model: The target directory where the TensorFlow.js model files will be stored.
