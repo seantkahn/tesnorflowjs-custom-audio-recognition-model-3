@@ -32,7 +32,11 @@ if not data_dir.exists():
 commands = np.array(tf.io.gfile.listdir(str(data_dir)))
 commands = commands[(commands != 'README.md') & (commands != '.DS_Store')]
 print('Commands:', commands)
-#The audio clips are 1 second or less at 16kHz. The output_sequence_length=16000 pads the short ones to exactly 1 second (and would trim longer ones) so that they can be easily batched.
+#The audio clips are 1 second or less at 16kHz. 
+#The output_sequence_length=16000 pads the short ones to exactly 1 second (and would trim longer ones) so that they can be easily batched.
+
+
+#change this architecture to complement the directory structure of your wav files - 
 
 train_ds, val_ds = tf.keras.utils.audio_dataset_from_directory(
     directory=data_dir,

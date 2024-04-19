@@ -1,70 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Custom Speech Recognition/Classification Trainer</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <!-- Import TensorFlow.js library latest -->
-        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<head>
+  <title>Custom Speech Recognition/Classification Trainer</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <!-- The default vocabulary includes the following words: the ten digits from "zero" to "nine", "up", "down", "left", "right", "go", "stop", "yes", "no", as well as the additional categories of "unknown word" and "background noise". -->
-        <!-- Import TensorFlow.js speech commands model -->
-        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+  <!-- Import TensorFlow.js library latest -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 
-        <!-- Import TensorFlow.js visualization library -->
-        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis/dist/tfjs-vis.umd.min.js" type="text/javascript"></script>        
-  </head>
-  <body>
-    <input type="file" id="file-input" multiple accept=".wav" >
-    <button id="load-files">Load WAV Files</button>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <!-- The default vocabulary includes the following words: the ten digits from "zero" to "nine", "up", "down", "left", "right", "go", "stop", "yes", "no", as well as the additional categories of "unknown word" and "background noise". -->
+  <!-- Import TensorFlow.js speech commands model -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
 
-    <button id="A" onmousedown="collect(0)" onmouseup="collect(null)">A</button>
-    <button id="B" onmousedown="collect(1)"onmouseup="collect(null)">B</button>
-    <button id="C" onmousedown="collect(2)"onmouseup="collect(null)">C</button>
-    <button id="D" onmousedown="collect(3)"onmouseup="collect(null)">D</button>
-    <button id="E" onmousedown="collect(4)"onmouseup="collect(null)">E</button>
-    <button id="F" onmousedown="collect(5)"onmouseup="collect(null)">F</button>
-    <button id="G" onmousedown="collect(6)"onmouseup="collect(null)">G</button>
-    <button id="H" onmousedown="collect(7)"onmouseup="collect(null)">H</button>
-    <button id="I" onmousedown="collect(8)"onmouseup="collect(null)">I</button>
-    <button id="J" onmousedown="collect(9)"onmouseup="collect(null)">J</button>
-    <button id="K" onmousedown="collect(10)"onmouseup="collect(null)">K</button>
-    <button id="L" onmousedown="collect(11)"onmouseup="collect(null)">L</button>
-    <button id="M" onmousedown="collect(12)"onmouseup="collect(null)">M</button>
-    <button id="N" onmousedown="collect(13)"onmouseup="collect(null)">N</button>
-    <button id="O" onmousedown="collect(14)"onmouseup="collect(null)">O</button>
-    <button id="P" onmousedown="collect(15)"onmouseup="collect(null)">P</button>
-    <button id="Q" onmousedown="collect(16)"onmouseup="collect(null)">Q</button>
-    <button id="R" onmousedown="collect(17)"onmouseup="collect(null)">R</button>
-    <button id="S" onmousedown="collect(18)"onmouseup="collect(null)">S</button>
-    <button id="T" onmousedown="collect(19)"onmouseup="collect(null)">T</button>
-    <button id="U" onmousedown="collect(20)"onmouseup="collect(null)">U</button>
-    <button id="V" onmousedown="collect(21)"onmouseup="collect(null)">V</button>
-    <button id="W" onmousedown="collect(22)"onmouseup="collect(null)">W</button>
-    <button id="X" onmousedown="collect(23)"onmouseup="collect(null)">X</button>
-    <button id="Y" onmousedown="collect(24)"onmouseup="collect(null)">Y</button>
-    <button id="Z" onmousedown="collect(25)"onmouseup="collect(null)">Z</button>
-    <button id="Apple" onmousedown="collect(26)"onmouseup="collect(null)">Apple</button>
-    <button id="Bird" onmousedown="collect(27)"onmouseup="collect(null)">Bird</button>
-    <button id="Boat" onmousedown="collect(28)"onmouseup="collect(null)">Boat</button>
-    <button id="Butterfly" onmousedown="collect(29)"onmouseup="collect(null)">Butterfly</button>
-    <button id="Car" onmousedown="collect(30)"onmouseup="collect(null)">Car</button>
-    <button id="Dog" onmousedown="collect(31)"onmouseup="collect(null)">Dog</button>
-    <button id="Cat" onmousedown="collect(32)"onmouseup="collect(null)">Cat</button>
-    <button id="Horse" onmousedown="collect(33)"onmouseup="collect(null)">Horse</button>
-    <button id="Train" onmousedown="collect(34)"onmouseup="collect(null)">Train</button>
-    <button id="Noise" onmousedown="collect(35)"onmouseup="collect(null)">Noise</button>
-    <br/><br/>
-    <button id="train" onclick="train()">Train Model</button>
-    <button id="listen" onclick="listen()">Listen/Test Model</button>
-    <button id="save" onclick="save()">Save Model</button>
-    <button id="load" onclick="loadNewModel()">Load Saved Model</button>
+  <!-- Import TensorFlow.js visualization library -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis/dist/tfjs-vis.umd.min.js"
+    type="text/javascript"></script>
+</head>
 
-    <br/><br/>
-    <div id="console"></div>
-    <script src="script.js"></script>
-  </body>
+<body>
+  <!-- <input type="file" id="file-input" multiple accept=".wav" >
+    <button id="load-files">Load WAV Files</button> -->
+  <p>microphone training</p>
+  <button id="A" onmousedown="collect(0)" onmouseup="collect(null)">A</button>
+  <button id="B" onmousedown="collect(1)" onmouseup="collect(null)">B</button>
+  <button id="C" onmousedown="collect(2)" onmouseup="collect(null)">C</button>
+  <button id="D" onmousedown="collect(3)" onmouseup="collect(null)">D</button>
+  <button id="E" onmousedown="collect(4)" onmouseup="collect(null)">E</button>
+  <button id="F" onmousedown="collect(5)" onmouseup="collect(null)">F</button>
+  <button id="G" onmousedown="collect(6)" onmouseup="collect(null)">G</button>
+  <button id="H" onmousedown="collect(7)" onmouseup="collect(null)">H</button>
+  <button id="I" onmousedown="collect(8)" onmouseup="collect(null)">I</button>
+  <button id="J" onmousedown="collect(9)" onmouseup="collect(null)">J</button>
+  <button id="K" onmousedown="collect(10)" onmouseup="collect(null)">K</button>
+  <button id="L" onmousedown="collect(11)" onmouseup="collect(null)">L</button>
+  <button id="M" onmousedown="collect(12)" onmouseup="collect(null)">M</button>
+  <button id="N" onmousedown="collect(13)" onmouseup="collect(null)">N</button>
+  <button id="O" onmousedown="collect(14)" onmouseup="collect(null)">O</button>
+  <button id="P" onmousedown="collect(15)" onmouseup="collect(null)">P</button>
+  <button id="Q" onmousedown="collect(16)" onmouseup="collect(null)">Q</button>
+  <button id="R" onmousedown="collect(17)" onmouseup="collect(null)">R</button>
+  <button id="S" onmousedown="collect(18)" onmouseup="collect(null)">S</button>
+  <button id="T" onmousedown="collect(19)" onmouseup="collect(null)">T</button>
+  <button id="U" onmousedown="collect(20)" onmouseup="collect(null)">U</button>
+  <button id="V" onmousedown="collect(21)" onmouseup="collect(null)">V</button>
+  <button id="W" onmousedown="collect(22)" onmouseup="collect(null)">W</button>
+  <button id="X" onmousedown="collect(23)" onmouseup="collect(null)">X</button>
+  <button id="Y" onmousedown="collect(24)" onmouseup="collect(null)">Y</button>
+  <button id="Z" onmousedown="collect(25)" onmouseup="collect(null)">Z</button>
+  <button id="Apple" onmousedown="collect(26)" onmouseup="collect(null)">Apple</button>
+  <button id="Bird" onmousedown="collect(27)" onmouseup="collect(null)">Bird</button>
+  <button id="Boat" onmousedown="collect(28)" onmouseup="collect(null)">Boat</button>
+  <button id="Butterfly" onmousedown="collect(29)" onmouseup="collect(null)">Butterfly</button>
+  <button id="Car" onmousedown="collect(30)" onmouseup="collect(null)">Car</button>
+  <button id="Dog" onmousedown="collect(31)" onmouseup="collect(null)">Dog</button>
+  <button id="Cat" onmousedown="collect(32)" onmouseup="collect(null)">Cat</button>
+  <button id="Horse" onmousedown="collect(33)" onmouseup="collect(null)">Horse</button>
+  <button id="Train" onmousedown="collect(34)" onmouseup="collect(null)">Train</button>
+  <button id="Noise" onmousedown="collect(35)" onmouseup="collect(null)">Noise</button>
+  <br /><br />
+  <!-- File Inputs for Each Class -->
+  <p>.wav upload training</p>
+  <input type="file" id="input-A" multiple accept=".wav" style="display:none;" onchange="loadLabel(0, this.files)">
+  <input type="file" id="input-B" multiple accept=".wav" style="display:none;" onchange="loadLabel(1, this.files)">
+  <input type="file" id="input-C" multiple accept=".wav" style="display:none;" onchange="loadLabel(2, this.files)">
+  <input type="file" id="input-D" multiple accept=".wav" style="display:none;" onchange="loadLabel(3, this.files)">
+  <input type="file" id="input-E" multiple accept=".wav" style="display:none;" onchange="loadLabel(4, this.files)">
+  <input type="file" id="input-F" multiple accept=".wav" style="display:none;" onchange="loadLabel(5, this.files)">
+  <input type="file" id="input-G" multiple accept=".wav" style="display:none;" onchange="loadLabel(6, this.files)">
+  <input type="file" id="input-H" multiple accept=".wav" style="display:none;" onchange="loadLabel(7, this.files)">
+  <input type="file" id="input-I" multiple accept=".wav" style="display:none;" onchange="loadLabel(8, this.files)">
+  <input type="file" id="input-J" multiple accept=".wav" style="display:none;" onchange="loadLabel(9, this.files)">
+  <input type="file" id="input-K" multiple accept=".wav" style="display:none;" onchange="loadLabel(10, this.files)">
+  <input type="file" id="input-L" multiple accept=".wav" style="display:none;" onchange="loadLabel(11, this.files)">
+  <input type="file" id="input-M" multiple accept=".wav" style="display:none;" onchange="loadLabel(12, this.files)">
+  <input type="file" id="input-N" multiple accept=".wav" style="display:none;" onchange="loadLabel(13, this.files)">
+  <input type="file" id="input-O" multiple accept=".wav" style="display:none;" onchange="loadLabel(14, this.files)">
+  <input type="file" id="input-P" multiple accept=".wav" style="display:none;" onchange="loadLabel(15, this.files)">
+  <input type="file" id="input-Q" multiple accept=".wav" style="display:none;" onchange="loadLabel(16, this.files)">
+  <input type="file" id="input-R" multiple accept=".wav" style="display:none;" onchange="loadLabel(17, this.files)">
+  <input type="file" id="input-S" multiple accept=".wav" style="display:none;" onchange="loadLabel(18, this.files)">
+  <input type="file" id="input-T" multiple accept=".wav" style="display:none;" onchange="loadLabel(19, this.files)">
+  <input type="file" id="input-U" multiple accept=".wav" style="display:none;" onchange="loadLabel(20, this.files)">
+  <input type="file" id="input-V" multiple accept=".wav" style="display:none;" onchange="loadLabel(21, this.files)">
+  <input type="file" id="input-W" multiple accept=".wav" style="display:none;" onchange="loadLabel(22, this.files)">
+  <input type="file" id="input-X" multiple accept=".wav" style="display:none;" onchange="loadLabel(23, this.files)">
+  <input type="file" id="input-Y" multiple accept=".wav" style="display:none;" onchange="loadLabel(24, this.files)">
+  <input type="file" id="input-Z" multiple accept=".wav" style="display:none;" onchange="loadLabel(25, this.files)">
+  <input type="file" id="input-Apple" multiple accept=".wav" style="display:none;" onchange="loadLabel(26, this.files)">
+  <input type="file" id="input-Bird" multiple accept=".wav" style="display:none;" onchange="loadLabel(27, this.files)">
+  <input type="file" id="input-Boat" multiple accept=".wav" style="display:none;" onchange="loadLabel(28, this.files)">
+  <input type="file" id="input-Butterfly" multiple accept=".wav" style="display:none;"onchange="loadLabel(29, this.files)">
+  <input type="file" id="input-Car" multiple accept=".wav" style="display:none;" onchange="loadLabel(30, this.files)">
+  <input type="file" id="input-Dog" multiple accept=".wav" style="display:none;" onchange="loadLabel(31, this.files)">
+  <input type="file" id="input-Cat" multiple accept=".wav" style="display:none;" onchange="loadLabel(32, this.files)">
+  <input type="file" id="input-Horse" multiple accept=".wav" style="display:none;" onchange="loadLabel(33, this.files)">
+  <input type="file" id="input-Train" multiple accept=".wav" style="display:none;" onchange="loadLabel(34, this.files)">
+  <input type="file" id="input-Noise" multiple accept=".wav" style="display:none;" onchange="loadLabel(35, this.files)">
+ 
+  <!-- Corresponding Buttons for Each Class -->
+  <button id="A1" onclick="document.getElementById('input-A').click()">Load A Files</button>
+  <button id="B1" onclick="document.getElementById('input-B').click()">Load B Files</button>
+  <button id="C1" onclick="document.getElementById('input-C').click()">Load C Files</button>
+  <button id="D1" onclick="document.getElementById('input-D').click()">Load D Files</button>
+  <button id="E1" onclick="document.getElementById('input-E').click()">Load E Files</button>
+  <button id="F1" onclick="document.getElementById('input-F').click()">Load F Files</button>
+  <button id="G1" onclick="document.getElementById('input-G').click()">Load G Files</button>
+  <button id="H1" onclick="document.getElementById('input-H').click()">Load H Files</button>
+  <button id="I1" onclick="document.getElementById('input-I').click()">Load I Files</button>
+  <button id="J1" onclick="document.getElementById('input-J').click()">Load J Files</button>
+  <button id="K1" onclick="document.getElementById('input-K').click()">Load K Files</button>
+  <button id="L1" onclick="document.getElementById('input-L').click()">Load L Files</button>
+  <button id="M1" onclick="document.getElementById('input-M').click()">Load M Files</button>
+  <button id="N1" onclick="document.getElementById('input-N').click()">Load N Files</button>
+  <button id="O1" onclick="document.getElementById('input-O').click()">Load O Files</button>
+  <button id="P1" onclick="document.getElementById('input-P').click()">Load P Files</button>
+  <button id="Q1" onclick="document.getElementById('input-Q').click()">Load Q Files</button>
+  <button id="R1" onclick="document.getElementById('input-R').click()">Load R Files</button>
+  <button id="S1" onclick="document.getElementById('input-S').click()">Load S Files</button>
+  <button id="T1" onclick="document.getElementById('input-T').click()">Load T Files</button>
+  <button id="U1" onclick="document.getElementById('input-U').click()">Load U Files</button>
+  <button id="V1" onclick="document.getElementById('input-V').click()">Load V Files</button>
+  <button id="W1" onclick="document.getElementById('input-W').click()">Load W Files</button>
+  <button id="X1" onclick="document.getElementById('input-X').click()">Load X Files</button>
+  <button id="Y1" onclick="document.getElementById('input-Y').click()">Load Y Files</button>
+  <button id="Z1" onclick="document.getElementById('input-Z').click()">Load Z Files</button>
+  <button id="Apple1" onclick="document.getElementById('input-Apple').click()">Load Apple Files</button>
+  <button id="Bird1" onclick="document.getElementById('input-Bird').click()">Load Bird Files</button>
+  <button id="Boat1" onclick="document.getElementById('input-Boat').click()">Load Boat Files</button>
+  <button id="Butterfly1" onclick="document.getElementById('input-Butterfly').click()">Load Butterfly Files</button>
+  <button id="Car1" onclick="document.getElementById('input-Car').click()">Load Car Files</button>
+  <button id="Dog1" onclick="document.getElementById('input-Dog').click()">Load Dog Files</button>
+  <button id="Cat1" onclick="document.getElementById('input-Cat').click()">Load Cat Files</button>
+  <button id="Horse1" onclick="document.getElementById('input-Horse').click()">Load Horse Files</button>
+  <button id="Train1" onclick="document.getElementById('input-Train').click()">Load Train Files</button>
+  <button id="Noise1" onclick="document.getElementById('input-Noise').click()">Load Noise Files</button>
+  <br /><br />
+  <p>actions</p>
+  <button id="normalize" onclick="calcualteNormalizationParameters()">calc .wav Normalization Parameters</button>
+  <button id="train" onclick="train()">Train Model</button>
+  <button id="listen" onclick="listen()">Listen/Test Model</button>
+  <button id="save" onclick="save()">Save Model</button>
+  <button id="load" onclick="loadNewModel()">Load Saved Model</button>
+
+  <br /><br />
+  <div id="console"></div>
+  <script src="script.js"></script>
+</body>
+
 </html>

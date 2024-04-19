@@ -1,3 +1,5 @@
+// python -m http.server 8000
+// http://127.0.0.1:8000
 //initializing the model
     //recognizer holds to model
     //app() function is called to create the model - An asynchronous function that initializes the speech recognizer with the BROWSER_FFT model (optimized for browsers) and then calls buildModel() to prepare the custom model for training.
@@ -26,7 +28,7 @@
 //saving the model
     //save(): An asynchronous function that loads the trained model from the server and stores it in a variable for future use.
     //save(): Demonstrates how to load a model from a specified URL. This might be intended for loading a pre-trained model, although in this context, it seems more appropriate as a placeholder or example of how to implement model loading.
-
+//2 5 6 8 9 11
 
 let recognizer;
 async function app() {
@@ -58,15 +60,20 @@ function collect(label) {
   //To avoid numerical issues, we normalize the data to have an average of 0 and a standard deviation of 1. In this case, the spectrogram values are usually large negative numbers around -100 and deviation of 10: 
   let vals = normalize(data.subarray(-frameSize * NUM_FRAMES));
    examples.push({vals, label});
-   document.querySelector('#console').textContent =
-       `${examples.length} examples collected`;
+  //  document.querySelector('#console').textContent =
+  //      `${examples.length} examples collected`;
+  labelCounts[label] += 1;  // Increment the count for the label
+  updateExampleCountUI();  // Update the UI
+
  }, {
    overlapFactor: 0.999,
    includeSpectrogram: true,
    invokeCallbackOnNoiseAndUnknown: true
  });
 }
-//To avoid numerical issues, we normalize the data to have an average of 0 and a standard deviation of 1. In this case, the spectrogram values are usually large negative numbers around -100 and deviation of 10:
+//To avoid numerical issues, we normalize the data to have an average of 0 and a standard deviation of 1. 
+//In this case, the spectrogram values are usually large negative numbers around -100 and deviation of 10:
+
 function normalize(x) {
  const mean = -100;
  const std = 10;
@@ -78,7 +85,7 @@ let model;
 //The model is a convolutional neural network with a depthwise convolutional layer, a max pooling layer, and a dense layer. 
     //The model is compiled with the Adam optimizer and the categorical crossentropy loss function. The training process is done in batches of 16 examples for 10 epochs. 
     //The training process is asynchronous and the UI is updated with the accuracy and epoch number at the end of each epoch.
-//At a high level we are doing two things: buildModel() defines the model architecture and train() trains the model using the collected data. 
+//we are doing two things: buildModel() defines the model architecture and train() trains the model using the collected data. 
 
 async function train() {
  toggleButtons(false);
@@ -100,6 +107,7 @@ async function train() {
  tf.dispose([xs, ys]);
  toggleButtons(true);
 }
+
 //The input shape of the model is [NUM_FRAMES, 232, 1] where each frame is 23ms of audio containing 232 numbers that correspond to different frequencies (232 was chosen because it is the amount of frequency buckets needed to capture the human voice). 
 //In this codelab, we are using samples that are 3 frames long (~70ms samples) since we are making sounds instead of speaking whole words to control the slider.
 //The model has 4 layers: a convolutional layer that processes the audio data (represented as a spectrogram), a max pool layer, a flatten layer, and a dense layer that maps to the 3 actions:
@@ -182,14 +190,77 @@ function listen() {
    invokeCallbackOnNoiseAndUnknown: true
  });
 }
-document.getElementById('load-files').addEventListener('click', async () => {
-  let files = document.getElementById('file-input').files;
+// document.getElementById('load-files').addEventListener('click', async () => {
+//   let files = document.getElementById('file-input').files;
+//   for (let file of files) {
+//       let audioBuffer = await file.arrayBuffer();
+//       let tensor = await convertToTensor(audioBuffer);
+//       label = 
+//       examples.push({vals: tensor, label: 0}); // Adjust the label as needed
+//   }
+// });
+ 
+const labelIds = [
+  "A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", 
+  "I1", "J1", "K1", "L1", "M1", "N1", "O1", "P1", 
+  "Q1", "R1", "S1", "T1", "U1", "V1", "W1", "X1", 
+  "Y1", "Z1", "Apple1", "Bird1", "Boat1", "Butterfly1", 
+  "Car1", "Dog1", "Cat1", "Horse1", "Train1", "Noise1"
+];
+// async function loadLabel(numericLabel, files){
+//   const elementId = labels[numericLabel]; // Get the correct ID from the array
+//   let files = document.getElementById(elementId).files;
+//   if (files.length === 0) {
+//     console.log("No files selected.");
+//     return;
+//   }
+//   for (let file of files) {
+//     let audioBuffer = await file.arrayBuffer();
+//     let tensor = await convertToTensor(audioBuffer);
+//     examples.push({vals: tensor, label: numericLabel}); // Adjust the label as needed
+//     labelCounts[numericLabel] += 1;  // Increment the count for the label
+//   }
+//   updateExampleCountUI();  // Update the UI after all files are processed
+// }
+async function loadLabel(numericLabel, files) {
   for (let file of files) {
       let audioBuffer = await file.arrayBuffer();
       let tensor = await convertToTensor(audioBuffer);
-      examples.push({vals: tensor, label: 0}); // Adjust the label as needed
+      examples.push({vals: tensor, label: numericLabel}); // Add to your training examples
   }
-});
+  updateExampleCountUI(); //update UI to show how many examples have been loaded
+}
+
+async function calculateNormalizationParameters() {//call before training to compute mean and deviation from laoded data
+  let allData = [];
+  // Assuming 'examples' is filled with some initial data to calculate stats
+  for (let example of examples) {
+      allData = allData.concat(Array.from(example.vals));
+  }
+  const dataTensor = tf.tensor1d(allData);
+  globalMean = dataTensor.mean().dataSync()[0];
+  globalStd = dataTensor.std().dataSync()[0];
+  dataTensor.dispose();
+  updateExampleCountUI();
+}
+let labelCounts = new Array(36).fill(0);  // Assuming you have 36 labels, from 0 to 35
+
+function updateExampleCountUI() {
+  const consoleDiv = document.getElementById('console');
+  consoleDiv.innerHTML = '';  // Clear previous contents
+      // Display normalization parameters
+      consoleDiv.innerHTML += `<strong>Normalization Parameters:</strong><br>`;
+      consoleDiv.innerHTML += `Mean: ${globalMean.toFixed(2)}, Standard Deviation: ${globalStd.toFixed(2)}<br><br>`;
+  
+      // Display example counts
+      consoleDiv.innerHTML += `<strong>Label Counts:</strong><br>`;
+  labelCounts.forEach((count, index) => {
+      if (count > 0) {  // Only display labels with one or more examples
+          consoleDiv.innerHTML += `Label ${labels[index]}: ${count} examples<br>`;
+      }
+  });
+}
+
 
 async function convertToTensor(audioBuffer) {
   // Decode the audio to a tensor
